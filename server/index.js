@@ -4,6 +4,8 @@ import cors from "cors";
 import dotenv from "dotenv";
 dotenv.config();
 
+import {postSignup} from './controllers/user.js'
+
 const app = express();
 app.use(express.json());
 app.use(cors());
@@ -17,6 +19,8 @@ const MONGO_URL = process.env.MONGO_URL;
     console.log("MongoDB connected ✅");
   }
 })();
+
+app.post('/signup' ,postSignup)
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
