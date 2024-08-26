@@ -4,7 +4,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 dotenv.config();
 
-import {postSignup} from './controllers/user.js'
+import {postSignup , postLogin} from './controllers/user.js'
 
 const app = express();
 app.use(express.json());
@@ -21,6 +21,7 @@ const MONGO_URL = process.env.MONGO_URL;
 })();
 
 app.post('/signup' ,postSignup)
+app.post('/login' , postLogin)
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
