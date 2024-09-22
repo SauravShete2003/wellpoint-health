@@ -13,7 +13,7 @@ const apppointmentSchema = new Schema(
     },
     apppointmentReason: {
       type: String,
-      default: "Regular Checkup",
+      // default: "Regular Checkup",
     },
     appointmentDate: {
       type: Date,

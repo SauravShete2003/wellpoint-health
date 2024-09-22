@@ -1,4 +1,5 @@
 import User from "./../models/User.js";
+import Appointment from "./../models/Appointment.js";
 import jwt from "jsonwebtoken";
 import md5 from "md5";
 const postSignup = async (req, res) => {
@@ -55,14 +56,91 @@ const postLogin = async (req, res) => {
   if (!user) {
     return res.status(400).json({ message: "Invalid Email or Password" });
   }
-  // const token = jwt.sign(
-  //   { id: user._id, email: user.email },
-  //   process.env.SECRET_KEY,
-  //   { expiresIn: "1h" }
-  // );
+  const Token = jwt.sign(
+    {
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+    },
+    process.env.JWT_KEY,
+    {
+      expiresIn: "1d",
+    }
+  );
+  res.setHeader("Authorization", Token);
+
   res.json({
-    message: "Login Successfull",
+    message: "Login Successful",
     success: true,
+    data: user,
   });
 };
-export { postSignup, postLogin };
+
+const getUser = async (req, res) => {
+  try {
+    const users = await User.find();
+    res.json({
+      success: true,
+      message: "User fetched successfully",
+      data: users,
+    });
+  } catch (error) {
+    res.json({
+      success: false,
+      message: "Failed to fetch users",
+      data: null,
+      error: error.message,
+    });
+  }
+};
+
+const checkJWT = (req, res, next) => {
+  const jwtToken = req.headers.authorization;
+  if (!jwtToken) {
+    res.json({
+      success: false,
+      message: "No token provided",
+    });
+  }
+  jwt.verify(jwtToken, process.env.JWT_KEY, (err, decoded) => {
+    if (err) {
+      res.json({
+        success: false,
+        message: "Invalid token",
+      });
+    }
+    req.user = decoded;
+    next();
+  });
+};
+
+const getUserAppionment = async (req, res) => {
+  const userId = req.params.userId;
+
+  if (req.user._id === userId) {
+    return res.status(403).json({
+      message: "Unauthorized access",
+      success: false,
+    });
+  }
+
+  try {
+    const userAppionment = await Appointment.find({ user: userId });
+
+    if (userAppionment) {
+      return res.json({
+        message: "User appointments fetched successfully",
+        success: true,
+        data: userAppionment,
+      });
+    }
+  } catch (err) {
+    return res.status(500).json({
+      message: "Error while fetching user appointments",
+      success: false,
+      error: err.message,
+    });
+  }
+};
+
+export { postSignup, postLogin, getUser, checkJWT, getUserAppionment };
